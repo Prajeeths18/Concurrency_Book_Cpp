@@ -2,6 +2,8 @@
 .vscode
 .DS_Store
 main
+mutex
+flaw
 
 # Prerequisites
 *.d
