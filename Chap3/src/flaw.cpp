@@ -8,7 +8,9 @@ class data {
     int a; 
     std::string b;
 public:
-    void do_something();
+    void do_something() {
+        std::cout << "Do something...";
+    }
 };
 
 class data_wrapper {
