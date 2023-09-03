@@ -58,3 +58,33 @@ Why? Because the results of empty() and size() can't be relied on.
 A second thread comes in and calls pop(). This makes the size 0. Now, if the first thread is resumed,
 there is a problem. Before suspension, thread 1 operated on the condition that the stack isn't empty.
 But now, it is. 
+
+More precisely, consider the following piece of code:
+
+```C++
+if (!s.empty()) { // Line 1
+    T const value = s.top(); // Line 2
+    s.pop(); // Line 3
+    return value;
+}
+```
+
+The following race conditions are present:
+* **Between line 1 and line 2** - Thread 1 calls empty(), finds it non-empty. Now, a second thread can call pop() which will lead to the top value changing or not existing at all. 
+* **Between line 2 and line 3** - Consider the following execution order, in the case where 2 threads are accessing a shared stack, and each of them is supposed to process __different__ elements of the stack.
+
+  * Thread 1 - checks empty() - finds non-empty
+  * Thread 2 - checks empty() - finds non-empty
+  * Thread 1 - calls top()
+  * Thread 2 - calls top() 
+  * Thread 1 - calls pop()
+  * Thread 2 - calls pop()
+
+The issue here is that both the threads process the same value, and pops out the next value without processing it at all. 
+
+* This calls for a design that combines both `top()` and `pop()` into one function. But this comes with another problem.
+
+### Why can't we combine top() and pop()?
+
+* Consider a stack of vector objects (stack<vector<T>> s)
+* 
